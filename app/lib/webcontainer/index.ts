@@ -52,30 +52,46 @@ if (!import.meta.env.SSR) {
           }
         });
 
-        // --- SILENT BACKGROUND INSTALLER ---
+        // --- SILENT BACKGROUND INSTALLER & AUTO-BOOT ---
         try {
           // Watch the root directory to catch when package.json is created or updated
           webcontainer.fs.watch('/', (event, filename) => {
             if (filename === 'package.json') {
-              console.log('package.json changed, installing dependencies silently...');
-              webcontainer.spawn('npm', ['install']).then((installProcess) => {
+              console.log('Fast-installing dependencies...');
+              // Skip audits and heavy scripts for maximum speed
+              webcontainer.spawn('npm', ['install', '--no-audit', '--no-fund', '--ignore-scripts']).then(async (installProcess) => {
                 // Pipe the output to the browser console instead of the UI terminal
                 installProcess.output.pipeTo(
                   new WritableStream({
                     write(data) {
-                      console.log('[Hidden Install]:', data);
+                      console.log('[Fast Install]:', data);
                     },
                   })
                 );
+
+                const exitCode = await installProcess.exit;
+
+                // Immediately boot the dev server the exact millisecond install finishes
+                if (exitCode === 0) {
+                  console.log('Install complete. Auto-booting dev server...');
+                  const devProcess = await webcontainer.spawn('npm', ['run', 'dev']);
+                  devProcess.output.pipeTo(
+                    new WritableStream({
+                      write(data) {
+                        console.log('[Auto-Dev]:', data);
+                      },
+                    })
+                  );
+                }
               }).catch((err) => {
-                console.error('Silent install failed:', err);
+                console.error('Fast install failed:', err);
               });
             }
           });
         } catch (e) {
           console.error('Failed to initialize file watcher:', e);
         }
-        // -----------------------------------
+        // -----------------------------------------------
 
         return webcontainer;
       });
