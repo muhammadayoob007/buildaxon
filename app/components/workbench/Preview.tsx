@@ -65,6 +65,28 @@ export const Preview = memo(() => {
   // Toggle between responsive mode and device mode
   const [isDeviceModeOn, setIsDeviceModeOn] = useState(false);
 
+  // New Viewport State for quick toggles
+  const [viewportSize, setViewportSize] = useState<'desktop' | 'mobile' | 'game'>('desktop');
+
+  const handleViewportChange = (size: 'desktop' | 'mobile' | 'game') => {
+    setViewportSize(size);
+    if (isDeviceModeOn) {
+      setIsDeviceModeOn(false); // Turn off complex device mode when using quick toggles
+    }
+  };
+
+  const getIframeStyles = () => {
+    switch (viewportSize) {
+      case 'mobile':
+        return { width: '375px', height: '812px', margin: '0 auto', border: '8px solid #222', borderRadius: '24px' };
+      case 'game':
+        return { width: '800px', height: '450px', margin: '0 auto', border: '2px solid #444', aspectRatio: '16/9' };
+      case 'desktop':
+      default:
+        return { width: '100%', height: '100%', border: 'none' };
+    }
+  };
+
   // Use percentage for width
   const [widthPercent, setWidthPercent] = useState<number>(37.5);
   const [currentWidth, setCurrentWidth] = useState<number>(0);
@@ -144,6 +166,9 @@ export const Preview = memo(() => {
 
   const toggleDeviceMode = () => {
     setIsDeviceModeOn((prev) => !prev);
+    if (!isDeviceModeOn) {
+      setViewportSize('desktop'); // Reset viewport size when turning on advanced device mode
+    }
   };
 
   const startResizing = (e: React.PointerEvent, side: ResizeSide) => {
@@ -417,7 +442,7 @@ export const Preview = memo(() => {
             size.frameType === 'mobile'
               ? isLandscape
                 ? '40px 60px'
-                : '40px 20px'
+                ? '40px 20px'
               : isLandscape
                 ? '30px 50px'
                 : '50px 30px';
@@ -848,151 +873,163 @@ export const Preview = memo(() => {
         </div>
       </div>
 
-      <div className="flex-1 border-t border-bolt-elements-borderColor flex justify-center items-center overflow-auto">
-        <div
-          style={{
-            width: isDeviceModeOn ? (showDeviceFrameInPreview ? '100%' : `${widthPercent}%`) : '100%',
-            height: '100%',
-            overflow: 'auto',
-            background: 'var(--bolt-elements-background-depth-1)',
-            position: 'relative',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          {activePreview ? (
-            <>
-              {isDeviceModeOn && showDeviceFrameInPreview ? (
-                <div
-                  className="device-wrapper"
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '100%',
-                    height: '100%',
-                    padding: '0',
-                    overflow: 'auto',
-                    transition: 'all 0.3s ease',
-                    position: 'relative',
-                  }}
-                >
+      <div className="flex-1 border-t border-bolt-elements-borderColor flex flex-col overflow-hidden">
+        {/* New Device Toolbar (Only shown when not in complex device mode) */}
+        {!isDeviceModeOn && (
+          <div className="flex justify-center gap-4 p-2 bg-gray-800 text-white text-sm z-10 w-full shrink-0">
+            <button onClick={() => handleViewportChange('mobile')} className={viewportSize === 'mobile' ? 'text-blue-400 font-bold' : ''}>📱 Mobile</button>
+            <button onClick={() => handleViewportChange('desktop')} className={viewportSize === 'desktop' ? 'text-blue-400 font-bold' : ''}>💻 Web</button>
+            <button onClick={() => handleViewportChange('game')} className={viewportSize === 'game' ? 'text-blue-400 font-bold' : ''}>🎮 Game (16:9)</button>
+          </div>
+        )}
+
+        <div className="flex-1 w-full flex justify-center items-center overflow-auto bg-bolt-elements-background-depth-1">
+          <div
+            style={{
+              width: isDeviceModeOn ? (showDeviceFrameInPreview ? '100%' : `${widthPercent}%`) : '100%',
+              height: '100%',
+              overflow: 'auto',
+              background: 'var(--bolt-elements-background-depth-1)',
+              position: 'relative',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            {activePreview ? (
+              <>
+                {isDeviceModeOn && showDeviceFrameInPreview ? (
                   <div
-                    className="device-frame-container"
+                    className="device-wrapper"
                     style={{
-                      position: 'relative',
-                      borderRadius: selectedWindowSize.frameType === 'mobile' ? '36px' : '20px',
-                      background: getFrameColor(),
-                      padding: getFramePadding(),
-                      boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-                      overflow: 'hidden',
-                      transform: 'scale(1)',
-                      transformOrigin: 'center center',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      width: '100%',
+                      height: '100%',
+                      padding: '0',
+                      overflow: 'auto',
                       transition: 'all 0.3s ease',
-                      margin: '40px',
-                      width: isLandscape
-                        ? `${selectedWindowSize.height + (selectedWindowSize.frameType === 'mobile' ? 120 : 60)}px`
-                        : `${selectedWindowSize.width + (selectedWindowSize.frameType === 'mobile' ? 40 : 60)}px`,
-                      height: isLandscape
-                        ? `${selectedWindowSize.width + (selectedWindowSize.frameType === 'mobile' ? 80 : 60)}px`
-                        : `${selectedWindowSize.height + (selectedWindowSize.frameType === 'mobile' ? 80 : 100)}px`,
+                      position: 'relative',
                     }}
                   >
-                    {/* Notch - positioned based on orientation */}
                     <div
+                      className="device-frame-container"
                       style={{
-                        position: 'absolute',
-                        top: isLandscape ? '50%' : '20px',
-                        left: isLandscape ? '30px' : '50%',
-                        transform: isLandscape ? 'translateY(-50%)' : 'translateX(-50%)',
-                        width: isLandscape ? '8px' : selectedWindowSize.frameType === 'mobile' ? '60px' : '80px',
-                        height: isLandscape ? (selectedWindowSize.frameType === 'mobile' ? '60px' : '80px') : '8px',
-                        background: '#333',
-                        borderRadius: '4px',
-                        zIndex: 2,
+                        position: 'relative',
+                        borderRadius: selectedWindowSize.frameType === 'mobile' ? '36px' : '20px',
+                        background: getFrameColor(),
+                        padding: getFramePadding(),
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                        overflow: 'hidden',
+                        transform: 'scale(1)',
+                        transformOrigin: 'center center',
+                        transition: 'all 0.3s ease',
+                        margin: '40px',
+                        width: isLandscape
+                          ? `${selectedWindowSize.height + (selectedWindowSize.frameType === 'mobile' ? 120 : 60)}px`
+                          : `${selectedWindowSize.width + (selectedWindowSize.frameType === 'mobile' ? 40 : 60)}px`,
+                        height: isLandscape
+                          ? `${selectedWindowSize.width + (selectedWindowSize.frameType === 'mobile' ? 80 : 60)}px`
+                          : `${selectedWindowSize.height + (selectedWindowSize.frameType === 'mobile' ? 80 : 100)}px`,
                       }}
-                    />
+                    >
+                      {/* Notch - positioned based on orientation */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: isLandscape ? '50%' : '20px',
+                          left: isLandscape ? '30px' : '50%',
+                          transform: isLandscape ? 'translateY(-50%)' : 'translateX(-50%)',
+                          width: isLandscape ? '8px' : selectedWindowSize.frameType === 'mobile' ? '60px' : '80px',
+                          height: isLandscape ? (selectedWindowSize.frameType === 'mobile' ? '60px' : '80px') : '8px',
+                          background: '#333',
+                          borderRadius: '4px',
+                          zIndex: 2,
+                        }}
+                      />
 
-                    {/* Home button - positioned based on orientation */}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        bottom: isLandscape ? '50%' : '15px',
-                        right: isLandscape ? '30px' : '50%',
-                        transform: isLandscape ? 'translateY(50%)' : 'translateX(50%)',
-                        width: isLandscape ? '4px' : '40px',
-                        height: isLandscape ? '40px' : '4px',
-                        background: '#333',
-                        borderRadius: '50%',
-                        zIndex: 2,
-                      }}
-                    />
+                      {/* Home button - positioned based on orientation */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          bottom: isLandscape ? '50%' : '15px',
+                          right: isLandscape ? '30px' : '50%',
+                          transform: isLandscape ? 'translateY(50%)' : 'translateX(50%)',
+                          width: isLandscape ? '4px' : '40px',
+                          height: isLandscape ? '40px' : '4px',
+                          background: '#333',
+                          borderRadius: '50%',
+                          zIndex: 2,
+                        }}
+                      />
 
-                    <iframe
-                      ref={iframeRef}
-                      title="preview"
-                      style={{
-                        border: 'none',
-                        width: isLandscape ? `${selectedWindowSize.height}px` : `${selectedWindowSize.width}px`,
-                        height: isLandscape ? `${selectedWindowSize.width}px` : `${selectedWindowSize.height}px`,
-                        background: 'white',
-                        display: 'block',
-                      }}
-                      src={iframeUrl}
-                      sandbox="allow-scripts allow-forms allow-popups allow-modals allow-storage-access-by-user-activation allow-same-origin"
-                      allow="cross-origin-isolated"
-                    />
+                      <iframe
+                        ref={iframeRef}
+                        title="preview"
+                        style={{
+                          border: 'none',
+                          width: isLandscape ? `${selectedWindowSize.height}px` : `${selectedWindowSize.width}px`,
+                          height: isLandscape ? `${selectedWindowSize.width}px` : `${selectedWindowSize.height}px`,
+                          background: 'white',
+                          display: 'block',
+                        }}
+                        src={iframeUrl}
+                        sandbox="allow-scripts allow-forms allow-popups allow-modals allow-storage-access-by-user-activation allow-same-origin"
+                        allow="cross-origin-isolated"
+                      />
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <iframe
-                  ref={iframeRef}
-                  title="preview"
-                  className="border-none w-full h-full bg-bolt-elements-background-depth-1"
-                  src={iframeUrl}
-                  sandbox="allow-scripts allow-forms allow-popups allow-modals allow-storage-access-by-user-activation allow-same-origin"
-                  allow="geolocation; ch-ua-full-version-list; cross-origin-isolated; screen-wake-lock; publickey-credentials-get; shared-storage-select-url; ch-ua-arch; bluetooth; compute-pressure; ch-prefers-reduced-transparency; deferred-fetch; usb; ch-save-data; publickey-credentials-create; shared-storage; deferred-fetch-minimal; run-ad-auction; ch-ua-form-factors; ch-downlink; otp-credentials; payment; ch-ua; ch-ua-model; ch-ect; autoplay; camera; private-state-token-issuance; accelerometer; ch-ua-platform-version; idle-detection; private-aggregation; interest-cohort; ch-viewport-height; local-fonts; ch-ua-platform; midi; ch-ua-full-version; xr-spatial-tracking; clipboard-read; gamepad; display-capture; keyboard-map; join-ad-interest-group; ch-width; ch-prefers-reduced-motion; browsing-topics; encrypted-media; gyroscope; serial; ch-rtt; ch-ua-mobile; window-management; unload; ch-dpr; ch-prefers-color-scheme; ch-ua-wow64; attribution-reporting; fullscreen; identity-credentials-get; private-state-token-redemption; hid; ch-ua-bitness; storage-access; sync-xhr; ch-device-memory; ch-viewport-width; picture-in-picture; magnetometer; clipboard-write; microphone"
+                ) : (
+                  <iframe
+                    ref={iframeRef}
+                    title="preview"
+                    style={getIframeStyles()}
+                    className={`transition-all duration-300 bg-white ${viewportSize === 'desktop' ? 'w-full h-full border-none' : ''}`}
+                    src={iframeUrl}
+                    sandbox="allow-scripts allow-forms allow-popups allow-modals allow-storage-access-by-user-activation allow-same-origin"
+                    allow="geolocation; ch-ua-full-version-list; cross-origin-isolated; screen-wake-lock; publickey-credentials-get; shared-storage-select-url; ch-ua-arch; bluetooth; compute-pressure; ch-prefers-reduced-transparency; deferred-fetch; usb; ch-save-data; publickey-credentials-create; shared-storage; deferred-fetch-minimal; run-ad-auction; ch-ua-form-factors; ch-downlink; otp-credentials; payment; ch-ua; ch-ua-model; ch-ect; autoplay; camera; private-state-token-issuance; accelerometer; ch-ua-platform-version; idle-detection; private-aggregation; interest-cohort; ch-viewport-height; local-fonts; ch-ua-platform; midi; ch-ua-full-version; xr-spatial-tracking; clipboard-read; gamepad; display-capture; keyboard-map; join-ad-interest-group; ch-width; ch-prefers-reduced-motion; browsing-topics; encrypted-media; gyroscope; serial; ch-rtt; ch-ua-mobile; window-management; unload; ch-dpr; ch-prefers-color-scheme; ch-ua-wow64; attribution-reporting; fullscreen; identity-credentials-get; private-state-token-redemption; hid; ch-ua-bitness; storage-access; sync-xhr; ch-device-memory; ch-viewport-width; picture-in-picture; magnetometer; clipboard-write; microphone"
+                  />
+                )}
+                <ScreenshotSelector
+                  isSelectionMode={isSelectionMode}
+                  setIsSelectionMode={setIsSelectionMode}
+                  containerRef={iframeRef}
                 />
-              )}
-              <ScreenshotSelector
-                isSelectionMode={isSelectionMode}
-                setIsSelectionMode={setIsSelectionMode}
-                containerRef={iframeRef}
-              />
-            </>
-          ) : (
-            <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary">
-              No preview available
-            </div>
-          )}
-
-          {isDeviceModeOn && !showDeviceFrameInPreview && (
-            <>
-              {/* Width indicator */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '-25px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  background: 'var(--bolt-elements-background-depth-3, rgba(0,0,0,0.7))',
-                  color: 'var(--bolt-elements-textPrimary, white)',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  pointerEvents: 'none',
-                  opacity: resizingState.current.isResizing ? 1 : 0,
-                  transition: 'opacity 0.3s',
-                }}
-              >
-                {currentWidth}px
+              </>
+            ) : (
+              <div className="flex w-full h-full justify-center items-center bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary">
+                No preview available
               </div>
+            )}
 
-              <ResizeHandle side="left" />
-              <ResizeHandle side="right" />
-            </>
-          )}
+            {isDeviceModeOn && !showDeviceFrameInPreview && (
+              <>
+                {/* Width indicator */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '-25px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: 'var(--bolt-elements-background-depth-3, rgba(0,0,0,0.7))',
+                    color: 'var(--bolt-elements-textPrimary, white)',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                    pointerEvents: 'none',
+                    opacity: resizingState.current.isResizing ? 1 : 0,
+                    transition: 'opacity 0.3s',
+                  }}
+                >
+                  {currentWidth}px
+                </div>
+
+                <ResizeHandle side="left" />
+                <ResizeHandle side="right" />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

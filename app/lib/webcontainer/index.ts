@@ -52,6 +52,31 @@ if (!import.meta.env.SSR) {
           }
         });
 
+        // --- SILENT BACKGROUND INSTALLER ---
+        try {
+          // Watch the root directory to catch when package.json is created or updated
+          webcontainer.fs.watch('/', (event, filename) => {
+            if (filename === 'package.json') {
+              console.log('package.json changed, installing dependencies silently...');
+              webcontainer.spawn('npm', ['install']).then((installProcess) => {
+                // Pipe the output to the browser console instead of the UI terminal
+                installProcess.output.pipeTo(
+                  new WritableStream({
+                    write(data) {
+                      console.log('[Hidden Install]:', data);
+                    },
+                  })
+                );
+              }).catch((err) => {
+                console.error('Silent install failed:', err);
+              });
+            }
+          });
+        } catch (e) {
+          console.error('Failed to initialize file watcher:', e);
+        }
+        // -----------------------------------
+
         return webcontainer;
       });
 
