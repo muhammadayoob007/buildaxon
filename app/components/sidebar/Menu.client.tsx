@@ -15,11 +15,13 @@ import { classNames } from '~/utils/classNames';
 import { useStore } from '@nanostores/react';
 import { profileStore } from '~/lib/stores/profile';
 
+const SIDEBAR_WIDTH = 280;
+
 const menuVariants = {
   closed: {
     opacity: 0,
     visibility: 'hidden',
-    left: '-340px',
+    left: `-${SIDEBAR_WIDTH}px`,
     transition: {
       duration: 0.2,
       ease: cubicEasingFn,
@@ -276,7 +278,7 @@ export const Menu = () => {
         initial="open"
         animate={open ? 'open' : 'closed'}
         variants={menuVariants}
-        style={{ width: '340px' }}
+        style={{ width: `${SIDEBAR_WIDTH}px` }}
         className={classNames(
           'flex selection-accent flex-col side-menu fixed top-0 h-full',
           'bg-white dark:bg-gray-950 border-r border-teal-500/20 dark:border-teal-500/20',
@@ -329,6 +331,31 @@ export const Menu = () => {
                 <span className={selectionMode ? 'i-ph:x h-4 w-4' : 'i-ph:check-square h-4 w-4'} />
               </button>
             </div>
+
+            <div className="flex flex-col gap-1">
+              <a
+                href="/"
+                className="flex gap-3 items-center text-gray-700 dark:text-gray-300 hover:bg-teal-500/10 dark:hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-300 rounded-lg px-3 py-2 transition-colors"
+              >
+                <span className="inline-block i-ph:upload-simple h-4 w-4" />
+                <span className="text-sm font-medium">Import Chat</span>
+              </a>
+              <a
+                href="/"
+                className="flex gap-3 items-center text-gray-700 dark:text-gray-300 hover:bg-teal-500/10 dark:hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-300 rounded-lg px-3 py-2 transition-colors"
+              >
+                <span className="inline-block i-ph:folder-simple h-4 w-4" />
+                <span className="text-sm font-medium">Import Folder</span>
+              </a>
+              <a
+                href="/git"
+                className="flex gap-3 items-center text-gray-700 dark:text-gray-300 hover:bg-teal-500/10 dark:hover:bg-teal-500/10 hover:text-teal-700 dark:hover:text-teal-300 rounded-lg px-3 py-2 transition-colors"
+              >
+                <span className="inline-block i-ph:git-branch h-4 w-4" />
+                <span className="text-sm font-medium">Clone a Git Repo</span>
+              </a>
+            </div>
+
             <div className="relative w-full">
               <div className="absolute left-3 top-1/2 -translate-y-1/2">
                 <span className="i-ph:magnifying-glass h-4 w-4 text-teal-500 dark:text-teal-400" />
