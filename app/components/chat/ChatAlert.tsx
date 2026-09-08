@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useRef } from 'react';
 import type { ActionAlert } from '~/types/actions';
 import { classNames } from '~/utils/classNames';
 
@@ -14,8 +15,27 @@ export default function ChatAlert({ alert, clearAlert, postMessage }: Props) {
   const isPreview = source === 'preview';
   const title = isPreview ? 'Preview Error' : 'Terminal Error';
   const message = isPreview
-    ? 'We encountered an error while running the preview. Would you like Bolt to analyze and help resolve this issue?'
-    : 'We encountered an error while running terminal commands. Would you like Bolt to analyze and help resolve this issue?';
+    ? 'We encountered an error while running the preview. BuildAxon can analyze and help resolve this issue.'
+    : 'We encountered an error while running terminal commands. BuildAxon can analyze and help resolve this issue.';
+
+  const buildFixMessage = () =>
+    `*Fix this ${isPreview ? 'preview' : 'terminal'} error* \n\`\`\`${isPreview ? 'js' : 'sh'}\n${content}\n\`\`\`\n`;
+
+  /**
+   * Auto-fix once: when a NEW error appears, automatically ask BuildAxon to fix it a single time.
+   * We track the error content we already auto-fixed so we don't loop forever
+   * (error -> fix -> new error -> fix ... would drain the API quota).
+   * If the same error keeps coming, the user can click "Ask Build" manually.
+   */
+  const autoFixedFor = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (content && autoFixedFor.current !== content) {
+      autoFixedFor.current = content;
+      postMessage(buildFixMessage());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content]);
 
   return (
     <AnimatePresence>
@@ -53,6 +73,7 @@ export default function ChatAlert({ alert, clearAlert, postMessage }: Props) {
               className={`mt-2 text-sm text-bolt-elements-textSecondary`}
             >
               <p>{message}</p>
+              <p className="mt-1 text-xs text-teal-500">BuildAxon is attempting an automatic fix…</p>
               {description && (
                 <div className="text-xs text-bolt-elements-textSecondary p-2 bg-bolt-elements-background-depth-3 rounded mt-4 mb-4">
                   Error: {description}
@@ -69,11 +90,7 @@ export default function ChatAlert({ alert, clearAlert, postMessage }: Props) {
             >
               <div className={classNames(' flex gap-2')}>
                 <button
-                  onClick={() =>
-                    postMessage(
-                      `*Fix this ${isPreview ? 'preview' : 'terminal'} error* \n\`\`\`${isPreview ? 'js' : 'sh'}\n${content}\n\`\`\`\n`,
-                    )
-                  }
+                  onClick={() => postMessage(buildFixMessage())}
                   className={classNames(
                     `px-2 py-1.5 rounded-md text-sm font-medium`,
                     'bg-bolt-elements-button-primary-background',
@@ -84,7 +101,7 @@ export default function ChatAlert({ alert, clearAlert, postMessage }: Props) {
                   )}
                 >
                   <div className="i-ph:chat-circle-duotone"></div>
-                  Ask Bolt
+                  Ask Build again
                 </button>
                 <button
                   onClick={clearAlert}
