@@ -11,7 +11,7 @@ interface Integration {
 const INTEGRATIONS: Integration[] = [
   {
     name: 'Supabase',
-    href: '/#',
+    href: 'https://supabase.com',
     bg: '#3ECF8E',
     text: '#0b2e20',
     logo: (
@@ -22,7 +22,7 @@ const INTEGRATIONS: Integration[] = [
   },
   {
     name: 'GitHub',
-    href: '/#',
+    href: 'https://github.com',
     bg: '#24292e',
     text: '#ffffff',
     logo: (
@@ -33,7 +33,7 @@ const INTEGRATIONS: Integration[] = [
   },
   {
     name: 'Vercel',
-    href: '/#',
+    href: 'https://vercel.com',
     bg: '#000000',
     text: '#ffffff',
     logo: (
@@ -44,12 +44,12 @@ const INTEGRATIONS: Integration[] = [
   },
   {
     name: 'Netlify',
-    href: '/#',
+    href: 'https://netlify.com',
     bg: '#014847',
     text: '#32E6E2',
     logo: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="#32E6E2" xmlns="http://www.w3.org/2000/svg">
-        <path d="M16.934 8.519a1.044 1.044 0 0 1 .303.23l2.349-1.045-2.192-2.171-.491 2.954zM12.06 6.546a1.305 1.305 0 0 1 .209.574l3.497 1.482a1.044 1.044 0 0 1 .355-.177l.574-3.55-2.13-2.234-2.86 3.164a1.174 1.174 0 0 1 .355.737zM23.657 11.24l-3.34-3.33-2.845 1.263 3.152 3.184zM14.657 9.673l-3.51-1.484a1.148 1.148 0 0 1-.647.427l-.71 4.401a1.226 1.226 0 0 1 .262.267l6.11-.324zM11.386 8.204a1.13 1.13 0 0 1 .07-.31L7.94 6.412l-2.86 3.164 4.505 1.906a1.13 1.13 0 0 1 .303-.257zM9.98 12.19l-4.507-1.908-.573 3.55 3.115 1.32a1.044 1.044 0 0 1 .355-.178zM8.735 16.61l-2.66-1.127.49 2.954 2.192-.976a1.044 1.044 0 0 1-.022-.85z" />
+        <path d="M16.934 8.519a1.044 1.044 0 0 1 .303.23l2.349-1.045-2.192-2.171-.491 2.954zM12.06 6.546a1.305 1.305 0 0 1 .209.574l3.497 1.482a1.044 1.044 0 0 1 .355-.177l.574-3.55-2.13-2.234-2.86 3.164a1.174 1.174 0 0 1 .355.737zM23.657 11.24l-3.34-3.33-2.845 1.263 3.152 3.184zM14.657 9.673l-3.51-1.484a1.148 1.148 0 0 1-.647.427l-.71 4.401a1.226 1.226 0 0 1 .262.267l6.11-.324z" />
       </svg>
     ),
   },
@@ -58,11 +58,11 @@ const INTEGRATIONS: Integration[] = [
 const IntegrationButton: React.FC<{ integration: Integration }> = ({ integration }) => (
   <a
     href={integration.href}
-    data-state="closed"
-    data-discover="true"
+    target="_blank"
+    rel="noopener noreferrer"
     className="flex items-center gap-2.5 px-5 py-2.5 rounded-lg font-semibold text-sm transition-all hover:opacity-90 hover:scale-105"
     style={{ background: integration.bg, color: integration.text }}
-    title={`Connect ${integration.name}`}
+    title={`Open ${integration.name}`}
   >
     {integration.logo}
     {integration.name}
