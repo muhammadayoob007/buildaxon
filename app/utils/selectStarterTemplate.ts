@@ -9,7 +9,7 @@ You are an experienced developer who helps people choose the best starter templa
 Available templates:
 <template>
   <name>blank</name>
-  <description>Empty starter for simple scripts and trivial tasks that don't require a full template setup</description>
+  <description>Empty startaer for simple scripts and trivial tasks that don't require a full template setup</description>
   <tags>basic, script</tags>
 </template>
 ${templates
@@ -243,7 +243,7 @@ NO NOT EDIT/WRITE ANY FILES THAT ALREADY EXIST IN THE PROJECT AND DOES NOT NEED 
 ---
 Now that the Template is imported please continue with my original request
 
-IMPORTANT: Dont Forget to install the dependencies before running the app by using \`npm install && npm run dev\`
+IMPORTANT: DO NOT generate shell commands for \`npm install\` or \`npm run dev\`. The system handles dependency installation and server booting automatically in the background.
 `;
 
   return {
