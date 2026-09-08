@@ -67,7 +67,7 @@ export const Menu = () => {
   const { duplicateCurrentChat, exportChat } = useChatHistory();
   const menuRef = useRef<HTMLDivElement>(null);
   const [list, setList] = useState<ChatHistoryItem[]>([]);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [dialogContent, setDialogContent] = useState<DialogContent>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const profile = useStore(profileStore);
@@ -94,7 +94,6 @@ export const Menu = () => {
         throw new Error('Database not available');
       }
 
-      // Delete chat snapshot from localStorage
       try {
         const snapshotKey = `snapshot:${id}`;
         localStorage.removeItem(snapshotKey);
@@ -103,7 +102,6 @@ export const Menu = () => {
         console.error(`Error deleting snapshot for chat ${id}:`, snapshotError);
       }
 
-      // Delete the chat from the database
       await deleteById(db, id);
       console.log('Successfully deleted chat:', id);
     },
@@ -115,7 +113,6 @@ export const Menu = () => {
       event.preventDefault();
       event.stopPropagation();
 
-      // Log the delete operation to help debugging
       console.log('Attempting to delete chat:', { id: item.id, description: item.description });
 
       deleteChat(item.id)
@@ -125,11 +122,9 @@ export const Menu = () => {
             autoClose: 3000,
           });
 
-          // Always refresh the list
           loadEntries();
 
           if (chatId.get() === item.id) {
-            // hard page navigation to clear the stores
             console.log('Navigating away from deleted chat');
             window.location.pathname = '/';
           }
@@ -141,7 +136,6 @@ export const Menu = () => {
             autoClose: 3000,
           });
 
-          // Still try to reload entries in case data has changed
           loadEntries();
         });
     },
@@ -162,7 +156,6 @@ export const Menu = () => {
       const currentChatId = chatId.get();
       let shouldNavigate = false;
 
-      // Process deletions sequentially using the shared deleteChat logic
       for (const id of itemsToDeleteIds) {
         try {
           await deleteChat(id);
@@ -177,7 +170,6 @@ export const Menu = () => {
         }
       }
 
-      // Show appropriate toast message
       if (errors.length === 0) {
         toast.success(`${deletedCount} chat${deletedCount === 1 ? '' : 's'} deleted successfully`);
       } else {
@@ -186,14 +178,11 @@ export const Menu = () => {
         });
       }
 
-      // Reload the list after all deletions
       await loadEntries();
 
-      // Clear selection state
       setSelectedItems([]);
       setSelectionMode(false);
 
-      // Navigate if needed
       if (shouldNavigate) {
         console.log('Navigating away from deleted chat');
         window.location.pathname = '/';
@@ -210,7 +199,6 @@ export const Menu = () => {
     setSelectionMode(!selectionMode);
 
     if (selectionMode) {
-      // If turning selection mode OFF, clear selection
       setSelectedItems([]);
     }
   };
@@ -220,9 +208,9 @@ export const Menu = () => {
       const newSelectedItems = prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id];
       console.log('Selected items updated:', newSelectedItems);
 
-      return newSelectedItems; // Return the new array
+      return newSelectedItems;
     });
-  }, []); // No dependencies needed
+  }, []);
 
   const handleBulkDeleteClick = useCallback(() => {
     if (selectedItems.length === 0) {
@@ -238,7 +226,7 @@ export const Menu = () => {
     }
 
     setDialogContent({ type: 'bulkDelete', items: selectedChats });
-  }, [selectedItems, list]); // Keep list dependency
+  }, [selectedItems, list]);
 
   const selectAll = useCallback(() => {
     const allFilteredIds = filteredList.map((item) => item.id);
@@ -246,71 +234,30 @@ export const Menu = () => {
       const allFilteredAreSelected = allFilteredIds.length > 0 && allFilteredIds.every((id) => prev.includes(id));
 
       if (allFilteredAreSelected) {
-        // Deselect only the filtered items
         const newSelectedItems = prev.filter((id) => !allFilteredIds.includes(id));
         console.log('Deselecting all filtered items. New selection:', newSelectedItems);
 
         return newSelectedItems;
       } else {
-        // Select all filtered items, adding them to any existing selections
         const newSelectedItems = [...new Set([...prev, ...allFilteredIds])];
         console.log('Selecting all filtered items. New selection:', newSelectedItems);
 
         return newSelectedItems;
       }
     });
-  }, [filteredList]); // Depends only on filteredList
+  }, [filteredList]);
 
   useEffect(() => {
-    if (open) {
-      loadEntries();
-    }
-  }, [open, loadEntries]);
-
-  // Exit selection mode when sidebar is closed
-  useEffect(() => {
-    if (!open && selectionMode) {
-      /*
-       * Don't clear selection state anymore when sidebar closes
-       * This allows the selection to persist when reopening the sidebar
-       */
-      console.log('Sidebar closed, preserving selection state');
-    }
-  }, [open, selectionMode]);
-
-  useEffect(() => {
-    const enterThreshold = 40;
-    const exitThreshold = 40;
-
-    function onMouseMove(event: MouseEvent) {
-      if (isSettingsOpen) {
-        return;
-      }
-
-      if (event.pageX < enterThreshold) {
-        setOpen(true);
-      }
-
-      if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
-        setOpen(false);
-      }
-    }
-
-    window.addEventListener('mousemove', onMouseMove);
-
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-    };
-  }, [isSettingsOpen]);
+    loadEntries();
+  }, [loadEntries]);
 
   const handleDuplicate = async (id: string) => {
     await duplicateCurrentChat(id);
-    loadEntries(); // Reload the list after duplication
+    loadEntries();
   };
 
   const handleSettingsClick = () => {
     setIsSettingsOpen(true);
-    setOpen(false);
   };
 
   const handleSettingsClose = () => {
@@ -326,24 +273,24 @@ export const Menu = () => {
     <>
       <motion.div
         ref={menuRef}
-        initial="closed"
+        initial="open"
         animate={open ? 'open' : 'closed'}
         variants={menuVariants}
         style={{ width: '340px' }}
         className={classNames(
           'flex selection-accent flex-col side-menu fixed top-0 h-full',
-          'bg-white dark:bg-gray-950 border-r border-gray-100 dark:border-gray-800/50',
+          'bg-white dark:bg-gray-950 border-r border-teal-500/20 dark:border-teal-500/20',
           'shadow-sm text-sm',
           isSettingsOpen ? 'z-40' : 'z-sidebar',
         )}
       >
-        <div className="h-12 flex items-center justify-between px-4 border-b border-gray-100 dark:border-gray-800/50 bg-gray-50/50 dark:bg-gray-900/50">
+        <div className="h-12 flex items-center justify-between px-4 border-b border-teal-500/20 dark:border-teal-500/20 bg-gray-50/50 dark:bg-gray-900/50">
           <div className="text-gray-900 dark:text-white font-medium"></div>
           <div className="flex items-center gap-3">
             <span className="font-medium text-sm text-gray-900 dark:text-white truncate">
               {profile?.username || 'Guest User'}
             </span>
-            <div className="flex items-center justify-center w-[32px] h-[32px] overflow-hidden bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-500 rounded-full shrink-0">
+            <div className="flex items-center justify-center w-[32px] h-[32px] overflow-hidden bg-teal-500/10 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400 rounded-full shrink-0">
               {profile?.avatar ? (
                 <img
                   src={profile.avatar}
@@ -374,7 +321,7 @@ export const Menu = () => {
                 className={classNames(
                   'flex gap-1 items-center rounded-lg px-3 py-2 transition-colors',
                   selectionMode
-                    ? 'bg-purple-600 dark:bg-purple-500 text-white border border-purple-700 dark:border-purple-600'
+                    ? 'bg-teal-600 dark:bg-teal-500 text-white border border-teal-700 dark:border-teal-600'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700',
                 )}
                 aria-label={selectionMode ? 'Exit selection mode' : 'Enter selection mode'}
@@ -384,10 +331,10 @@ export const Menu = () => {
             </div>
             <div className="relative w-full">
               <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                <span className="i-ph:magnifying-glass h-4 w-4 text-gray-400 dark:text-gray-500" />
+                <span className="i-ph:magnifying-glass h-4 w-4 text-teal-500 dark:text-teal-400" />
               </div>
               <input
-                className="w-full bg-gray-50 dark:bg-gray-900 relative pl-9 pr-3 py-2 rounded-lg focus:outline-none focus:ring-1focus:ring-teal-500/50 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500border border-teal-500/30 dark:border-teal-500/30"
+                className="w-full bg-gray-50 dark:bg-gray-900 relative pl-9 pr-3 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500/50 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-500 border border-teal-500/30 dark:border-teal-500/30"
                 type="search"
                 placeholder="Search chats..."
                 onChange={handleSearchChange}
@@ -506,10 +453,6 @@ export const Menu = () => {
                       <DialogButton
                         type="danger"
                         onClick={() => {
-                          /*
-                           * Pass the current selectedItems to the delete function.
-                           * This captures the state at the moment the user confirms.
-                           */
                           const itemsToDeleteNow = [...selectedItems];
                           console.log('Bulk delete confirmed for', itemsToDeleteNow.length, 'items', itemsToDeleteNow);
                           deleteSelectedItems(itemsToDeleteNow);
@@ -524,7 +467,7 @@ export const Menu = () => {
               </Dialog>
             </DialogRoot>
           </div>
-          <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-800 px-4 py-3">
+          <div className="flex items-center justify-between border-t border-teal-500/20 dark:border-teal-500/20 px-4 py-3">
             <SettingsButton onClick={handleSettingsClick} />
             <ThemeSwitch />
           </div>
