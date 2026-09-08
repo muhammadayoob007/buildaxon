@@ -438,11 +438,9 @@ export const Preview = memo(() => {
           // Create the HTML content for the frame
           const frameColor = getFrameColor();
           const frameRadius = size.frameType === 'mobile' ? '36px' : '20px';
-          const framePadding =
-          size.frameType === 'mobile'
-          ? isLandscape
-            ? '40px 60px'
-            : '40px 20px'
+          const framePadding = size.frameType === 'mobile'
+            ? (isLandscape ? '40px 60px' : '40px 20px')
+            : (isLandscape ? '30px 50px' : '50px 30px');
 
           // Position notch and home button based on orientation
           const notchTop = isLandscape ? '50%' : '20px';
