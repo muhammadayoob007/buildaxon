@@ -27,7 +27,7 @@ function TopNav() {
 
         <div className="hidden md:flex items-center gap-6">
           <div className="relative" onMouseEnter={() => setProductsOpen(true)} onMouseLeave={() => setProductsOpen(false)}>
-            <button className="flex items-center gap-1 text-sm text-gray-300 hover:text-white transition-colors">
+            <button className="flex items-center gap-1 text-sm text-gray-300 hover:text-white transition-colors bg-transparent border-none outline-none cursor-pointer focus:outline-none">
               Products
               <span className="i-ph:caret-down text-xs" />
             </button>
