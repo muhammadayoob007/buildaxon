@@ -20,11 +20,13 @@ export const SendButton = ({ show, isStreaming, disabled, onClick }: SendButtonP
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
-          disabled={disabled}
+          // FORCE the button to be enabled if the AI is currently streaming
+          disabled={isStreaming ? false : disabled}
           onClick={(event) => {
             event.preventDefault();
 
-            if (!disabled) {
+            // Allow the click through if it's streaming, or if the button isn't disabled
+            if (isStreaming || !disabled) {
               onClick?.(event);
             }
           }}
