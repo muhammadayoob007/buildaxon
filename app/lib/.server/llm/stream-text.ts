@@ -193,5 +193,6 @@ ${lockedFilesListString}
     maxTokens: dynamicMaxTokens,
     messages: convertToCoreMessages(processedMessages as any),
     abortSignal: AbortSignal.timeout(120_000),
-    ...options,
-  });
+         ...options,
+    });
+}
