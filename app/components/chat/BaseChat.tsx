@@ -340,10 +340,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             {!chatStarted && (
              <div id="intro" className="mt-[24vh] max-w-chat mx-auto text-center px-4 lg:px-0">
                <h1 className="text-2xl lg:text-4xl font-bold text-orange-500 mb-3 animate-fade-in">
-                  Where ideas begin
+                  Build without limits
                 </h1>
                <p className="text-md lg:text-xl mb-8 text-cyan-400 animate-fade-in animation-delay-200">
-                  Bring ideas to life in seconds or get help on existing projects.
+                  Turn your ideas into real web apps with AI.
                 </p>
               </div>
             )}
