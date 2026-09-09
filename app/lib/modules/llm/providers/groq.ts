@@ -12,13 +12,17 @@ export default class GroqProvider extends BaseProvider {
     apiTokenKey: 'GROQ_API_KEY',
   };
 
+  /*
+   * Fallback list used only if the live model fetch (getDynamicModels) fails.
+   * Groq's lineup changes over time, so this is kept to current, stable model IDs
+   * rather than older preview models that Groq has since removed.
+   */
   staticModels: ModelInfo[] = [
-    { name: 'llama-3.1-8b-instant', label: 'Llama 3.1 8b (Groq)', provider: 'Groq', maxTokenAllowed: 8000 },
-    { name: 'llama-3.2-11b-vision-preview', label: 'Llama 3.2 11b (Groq)', provider: 'Groq', maxTokenAllowed: 8000 },
-    { name: 'llama-3.2-90b-vision-preview', label: 'Llama 3.2 90b (Groq)', provider: 'Groq', maxTokenAllowed: 8000 },
-    { name: 'llama-3.2-3b-preview', label: 'Llama 3.2 3b (Groq)', provider: 'Groq', maxTokenAllowed: 8000 },
-    { name: 'llama-3.2-1b-preview', label: 'Llama 3.2 1b (Groq)', provider: 'Groq', maxTokenAllowed: 8000 },
-    { name: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70b (Groq)', provider: 'Groq', maxTokenAllowed: 8000 },
+    { name: 'openai/gpt-oss-120b', label: 'GPT OSS 120b (Groq)', provider: 'Groq', maxTokenAllowed: 131072 },
+    { name: 'openai/gpt-oss-20b', label: 'GPT OSS 20b (Groq)', provider: 'Groq', maxTokenAllowed: 131072 },
+    { name: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70b (Groq)', provider: 'Groq', maxTokenAllowed: 131072 },
+    { name: 'qwen3-32b', label: 'Qwen3 32b (Groq)', provider: 'Groq', maxTokenAllowed: 131072 },
+    { name: 'llama-3.1-8b-instant', label: 'Llama 3.1 8b Instant (Groq)', provider: 'Groq', maxTokenAllowed: 131072 },
     {
       name: 'deepseek-r1-distill-llama-70b',
       label: 'Deepseek R1 Distill Llama 70b (Groq)',
