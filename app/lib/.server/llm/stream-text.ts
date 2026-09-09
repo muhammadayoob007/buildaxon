@@ -182,7 +182,7 @@ ${lockedFilesListString}
 
   // console.log(systemPrompt, processedMessages);
 
-  return await _streamText({
+    return await _streamText({
     model: provider.getModelInstance({
       model: modelDetails.name,
       serverEnv,
@@ -192,6 +192,6 @@ ${lockedFilesListString}
     system: systemPrompt,
     maxTokens: dynamicMaxTokens,
     messages: convertToCoreMessages(processedMessages as any),
+    abortSignal: AbortSignal.timeout(120_000),
     ...options,
   });
-}
