@@ -122,19 +122,29 @@
   animation: float7 21s infinite ease-in-out;
 }
 
-.ray8 {
-  width: 380px;
-  height: 550px;
-  background: var(--ray-gradient-secondary);
-  transform: rotate(-60deg);
-  top: -380px;
-  left: 750px;
-  filter: blur(58px);
-  opacity: 0.6;
-  animation: float8 14s infinite ease-in-out;
+.ray9 {
+  width: 550px;
+  height: 700px;
+  background: var(--ray-gradient-primary);
+  transform: rotate(45deg);
+  bottom: -450px;
+  right: -100px;
+  filter: blur(80px);
+  opacity: 0.55;
+  animation: float1 16s infinite ease-in-out;
 }
 
-@keyframes float1 {
+.ray10 {
+  width: 450px;
+  height: 550px;
+  background: var(--ray-gradient-accent);
+  transform: rotate(-30deg);
+  bottom: -350px;
+  right: 150px;
+  filter: blur(65px);
+  opacity: 0.5;
+  animation: float3 19s infinite ease-in-out;
+}@keyframes float1 {
   0%,
   100% {
     transform: rotate(65deg) translate(0, 0);
